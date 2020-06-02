@@ -4,7 +4,9 @@ Created on Sun Dec  2 13:02:55 2018
 
 This module is for converting discharge-stage
 data (downloaded from the NFIE HAND inundation mapping
-dataset) into rating curves. The stage for a particular
+dataset) into rating curves. 
+
+The stage for a particular
 discharge is computed by linear interpolation between 
 adjacent NFIE data points. 
 
@@ -14,19 +16,23 @@ import numpy as np
 import arcpy
 import pandas as pn
 
+
 def createRatingCurveDict(csvFile, gisCatchLayer):
-    """
+    '''
+    -----
+    :param csvFile: a csv file containing the rating curve information 
+    :param gisCatchLayer: GIS layer of catchments
+    :return COMIDs: a dictionary with the stage and discharge  of each COMID
+    -----
     This function creates the rating curve
     dictionary for a hydropop csv file and catchments
     specified in GIS
-    WARNING: make sure you set the arc env space in
-    the right directory
-    csvFile: csv file with hydropop data
-    gisCatchLayer: layer in GIS with catchments
+    
     Note that:
     The discharge units is m3s-1
     The stage units is m
-    """
+    -----
+    '''
     # import data frame
     dat = pn.read_csv(csvFile)
     # import catchments from GIS and initialize dictionary with COMIDs
@@ -49,22 +55,31 @@ def createRatingCurveDict(csvFile, gisCatchLayer):
 
 
 def getStage(COMIDs, catchment, discharge):
-    """
+    '''
+    -----
+    :param COMIDs: a dictionary with pre-set stage and discharge for each 
+    COMID, see createRatingCurveDict
+    :param catchment: COMID of catchment of interest
+    :param discharge: the discharge that we want to determine the stage for
+    :return : interpolated stage height
+    -----
     this function generates the stage heights for a specific
     discharge value at a specific catchment
-    WARNING: make sure you set the arc env space in
-    the right directory
-    COMIDs: dictionary from createRatingCurveDict
-    catchment: catchment for which stage is desired
-    discharge: discharge for which stage is desired
-    """
+    -----
+    '''
     return np.interp(discharge, COMIDs[catchment]['discharge'], COMIDs[catchment]['stage'])
+
 
 def writeStage(roadLayer, COMIDs):
     """
-    for a list of NWM discharge forecasts in the GIS road newtork layer,
-    this function writes the corresponding stage height
-    COMIDs is the dictionary for all COMIDs
+    -----
+    :param roadLayer: a GIS shapefile layer of roads
+    :param COMIDs: the rating curve dict with preset discharge-stage vals
+    :return None: 
+    -----
+    this function writes the corresponding stage height to the GIS road layer
+    shapefile, uses NWM discharge vals and a hydropop rating curve
+    -----
     """
     rdfields = ['CatchFEATUREID', 'NWM', 'stage']
     with arcpy.da.UpdateCursor(roadLayer, rdfields) as cursor:
@@ -74,9 +89,15 @@ def writeStage(roadLayer, COMIDs):
             cursor.updateRow(row)
     return None
 
+
 def writeInundation(roadlayer):
     """
+    -----
+    :param roadlayer: a GIS shapefile layer of roads
+    :return None:
+    -----
     writes the inundation to the GIS layer
+    inundation = stage - HAND
     """
     rdfields = ['HAND', 'stage', 'inundation']
     with arcpy.da.UpdateCursor(roadLayer, rdfields) as cursor:
@@ -85,6 +106,7 @@ def writeInundation(roadlayer):
                 row[2] = max(row[1] - row[0],0)  # inundation always positive
             cursor.updateRow(row)
     return None
+
 
 if __name__ == '__main__':
     csvFile = r"C:\Users\cesny\Dropbox\UT\Courses\Fall 2018\GISWR\project\data\NFIE-HAND\hydroprop-fulltable-120401.csv"

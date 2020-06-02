@@ -6,23 +6,29 @@ This module is for computing the minimum HAND value
 for each road segment and writing it to the road network
 layer
 
+The module also includes methods for identifying the points
+with the minimum HAND value at each road segment
+
 @author: cesny
 """
 import arcpy
 import pickle
 
 def getMinHAND(pointLayer):
-    """
-    given a point layer with grid code for lines
-    and hand value of each point, returns a dictionary
-    with minimum HAND for every polyline
-    """
+    '''
+    -----
+    :param pointLayer: a point layer with grid code for lines
+    and hand value of each point
+    :return minHAND: a dictionary with the minimum HAND value 
+    for every polyline
+    -----
+    '''
     ptfields = ['grid_code', 'RASTERVALU']
     minHAND = dict()
     try:
         for row in arcpy.da.SearchCursor(pointLayer, ptfields):
             if row[1] is not None:  # ignore null values that are outside HAND raster extent
-                if row[0] in minHAND: # check if road already considered
+                if row[0] in minHAND: # check if road already considered based on the grid code
                     if row[1] < minHAND[row[0]]:  # check if new is minimum so far
                         minHAND[row[0]] = max(row[1], 0)  # ensure HAND values are above zero
                 elif row[0] not in minHAND:
@@ -31,11 +37,19 @@ def getMinHAND(pointLayer):
         print('error reading points')
     return minHAND
 
+
 def findPointMinHAND(pointLayer):
-    """
-    this function works with the pointLayer to identify the specific
-    points that have the minimum HAND value in every road segment
-    """
+    '''
+    -----
+    :param pointLayer: GIS layer of points
+    :returns None:
+    -----
+    updates the GIS point layer by indicating if the point
+    is the minimum HAND value or not
+    this will be useful for extracting the minimum points into 
+    a separate shapefile
+    -----
+    '''
     ptfields = ['grid_code', 'RASTERVALU', 'minPoint']
     minHAND = dict()
     try:
@@ -57,11 +71,18 @@ def findPointMinHAND(pointLayer):
             cursor.updateRow(row)
     return None
 
+
 def assignHAND(roadLayer, minHAND):
-    """
-    adds a field to each road with the minimum HAND
-    value
-    """
+    '''
+    -----
+    :param roadLayer: GIS layer of road polylines
+    :param minHAND: a dictionary with the minimum HAND value on each road
+    :returns None:
+    -----
+    assigns to the roadLayer the minimum HAND values available in the 
+    minHAND dict
+    -----
+    '''
     rdfields = ['OBJECTID_1', 'HAND']
     with arcpy.da.UpdateCursor(roadLayer, rdfields) as cursor:
         for row in cursor:
@@ -72,15 +93,20 @@ def assignHAND(roadLayer, minHAND):
             cursor.updateRow(row)
     return None
 
+
 def getRoadMinHANDdict(roadLayer, pointLayer):
-    """
-    returns the dictionary needed for Gaussian process modeling
-    this dictionary has for every road the inundation,
-    the coordinates of the minimum HAND value point, and whether there is a
-    damaged road or not as observed by TxDOT
-    The resulting dictionary is saved as a pickle file that
-    can be re-used easily
-    """
+    '''
+    -----
+    :param roadLayer: GIS road layer
+    :param pointLayer: GIS layer of points with the HAND values
+    :return None:
+    -----
+    creates a dictionary that has for every road: inundation level, 
+    minimum HAND value, whether TXDOT observed an incident of not
+    -----
+    The resulting dictionary is saved as a pickle file
+    -----
+    '''
     ptfields = ['grid_code', 'POINT_X', 'POINT_Y']
     rdfields = ['OBJECTID_1', 'HAND', 'inundation', 'CNSTRNT_TYPE_CD']
     rdDict = dict()
@@ -104,10 +130,11 @@ def getRoadMinHANDdict(roadLayer, pointLayer):
     pickle.dump( rdDict, open( "rdDict.pckl", "wb" ) )
     return None
 
+
 def sanityCheck(roadLayer):
-    """
+    '''
     sanity check going through the road layer
-    """
+    '''
     rdfields = ['OBJECTID_1']
     temp = 0
     for row in arcpy.da.SearchCursor(roadLayer, rdfields):
@@ -117,6 +144,7 @@ def sanityCheck(roadLayer):
                 print('Error')
             temp = row[0]
     return None
+
 
 if __name__ == '__main__':
     arcpy.env.workspace = r"C:\Users\cesny\Dropbox\UT\Courses\Fall 2018\GISWR\project\data\proj\proj.gdb"

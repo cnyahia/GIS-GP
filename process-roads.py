@@ -9,22 +9,16 @@ by removing duplicates that belong to multiple catchments
 """
 import arcpy
 
-def shapetoDict(path):
-    """
-    takes shape file of road segments and returns a dictionary with
-    values of interest (catchment COMID, min HAND, observed road disruption
-    bolean, and location of lowest point)
-    """
-    return None
 
 def createUniqueTFID(roadShape):
-    """
+    '''
+    -----
+    :param roadShape: shapefile of the roads layer
+    :return None:
+    -----
     finds the unique values in target FID
-    this function removes duplicates, for example
-    if 14 appears twice, then the output list will
-    NOT have 14 in it! i.e. removes index completely
-    if it is duplicated!
-    """
+    -----
+    '''
     fc = roadShape
     fields = ['TARGET_FID']
     uniqueVals = set()
@@ -40,13 +34,19 @@ def createUniqueTFID(roadShape):
         print('Error searching dataset from GIS')    
     return uniqueVals
 
+
 def cleanRoads(roadShape, uniqueVals):
-    """
+    '''
+    -----
+    :param roadShape: a GIS shapefile for roads
+    :param uniqueVals: output of createUniqueTFID
+    -----
     takes in a shape file that is a vector feature dataset, and cleans it
     by removing road segments that are not in the basin as well as road
     segments that are present in the dataset due to catchem DEM boundary
     effects
-    """
+    -----
+    '''
     fc = roadShape
     fields = ['TARGET_FID', 'duplicate']
     with arcpy.da.UpdateCursor(fc, fields) as cursor:

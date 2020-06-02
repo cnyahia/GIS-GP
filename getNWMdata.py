@@ -22,10 +22,15 @@ import xarray
 import xml.etree.ElementTree as ET
 import numpy as np
 
+
 def getCOMIDs(Catchs):
-    """
-    retrieves the CatchIds from GIS
-    """
+    '''
+    -----
+    :input Catchs: a GIS shapefile layer of the catchments
+    :return list(CatchIDs): a list of the COMID for each catchment in the GIS
+    shapefile layer
+    -----
+    '''
     CatchIds = set()
     fields = ['FEATUREID']
     try:
@@ -34,6 +39,7 @@ def getCOMIDs(Catchs):
     except:
         print('Error reading catchments')
     return list(CatchIds)
+
 
 if __name__ == '__main__':
     # Note that the streamflow unit is m3s-1
