@@ -44,7 +44,7 @@ if __name__ == '__main__':
     CatchIds = getCOMIDs(gisCatchLayer)
     
     # get NWM data
-    thredds_base='http://thredds.hydroshare.org/thredds'
+    thredds_base ='http://thredds.hydroshare.org/thredds'
     date = '20170828'
     configuration = 'short_range'
     output_type = 'channel_rt'
