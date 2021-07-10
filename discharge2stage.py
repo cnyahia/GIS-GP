@@ -10,6 +10,7 @@ The stage for a particular
 discharge is computed by linear interpolation between 
 adjacent NFIE data points. 
 
+
 @author: cesny
 """
 import numpy as np

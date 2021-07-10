@@ -135,6 +135,9 @@ def getRoadMinHANDdict(roadLayer, pointLayer):
 def sanityCheck(roadLayer):
     '''
     sanity check going through the road layer
+    -----
+    :return None:
+    -----
     '''
     rdfields = ['OBJECTID_1']
     temp = 0

@@ -5,13 +5,11 @@ Created on Sun Dec  2 23:28:39 2018
 This module is for extracting NWM data for the
 catchments of interest. 
 
-###
 This code is based on the following
 hydroshare resource by Anthony Castronova
 Castronova, A. (2018). Hurricane Harvey NWM 
 Subsetting Exercise, HydroShare, 
 http://www.hydroshare.org/resource/3db192783bcb4599bab36d43fc3413db
-###
 
 @author: cesny
 """
